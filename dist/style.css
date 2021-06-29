@@ -1,2 +1,10 @@
 #signup-form {
 }
+
+#rooms {
+  border: 2px solid black;
+  margin-top: 100px;
+  padding: 20px;
+  /*   display: none;
+ */
+}
