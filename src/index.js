@@ -141,10 +141,14 @@ const setUpRooms = (data) => {
     let html = "";
     data.forEach((doc) => {
       const room = doc.data();
+
+      console.log(doc.id);
       //console.log("Iterated snapshot", room);
-      const li = `<li><button>${room.Name}</button>${room.Count} Students</li>`;
+      const li = `<li><button data-id="btn" class="room-select" id="${doc.id}">${room.Name}</button>${room.Count} Students</li>`;
 
       html += li;
+
+      //add event listener that ties the room name with the name in database
     });
     roomList.innerHTML = html;
   } else {
@@ -163,6 +167,7 @@ createForm.addEventListener("submit", (e) => {
     .add({
       Name: createForm["room-name"].value,
       Count: createForm["room-count"].value,
+      active_count: 0,
     })
     .then(() => {
       //close modal and reset form
@@ -172,3 +177,55 @@ createForm.addEventListener("submit", (e) => {
       console.error(err);
     });
 });
+
+//start here- this sets up a listener on the room for when its received updates
+
+//get the name
+let count = 0;
+document.body.addEventListener("click", function (event) {
+  if (event.target.dataset.id == "btn") {
+    let wantedValue = event.target.innerHTML;
+    console.log(wantedValue);
+
+    db.collection("rooms").onSnapshot((snapshot) => {
+      //console.log("Snapshot docs", snapshot.docs);
+      snapshot.forEach((snap) => {
+        if (snap.data().Name === wantedValue) {
+          if (snap.data().active_count < snap.data().Count) {
+            //snap.data().active_count += 1;
+            console.log(true);
+            console.log(snap);
+            console.log(snap.data().Name);
+            console.log(snap.id);
+
+            return db
+              .collection("rooms")
+              .doc(snap.id)
+              .update({
+                Count: (count += 1),
+              });
+          } else {
+            console.log(false);
+          }
+        }
+      });
+    });
+  }
+});
+
+/* db.collection("rooms").onSnapshot((snapshot) => {
+  console.log(snapshot.docs);
+});
+
+var frankDocRef = db
+  .collection("rooms")
+  .doc("Eng 222")
+  .update({
+    Count: 1,
+  })
+  .then(() => {
+    console.log("updated");
+  });
+
+console.log(frankDocRef);
+ */
