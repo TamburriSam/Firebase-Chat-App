@@ -20,6 +20,9 @@ const loggedInLinks = document.querySelector(".logged-in");
 
 const setUpUI = (user) => {
   if (user) {
+    //output account information
+    const html = `Hello ${user.email}`;
+    usernameContainer.innerHTML = html;
     //togle UI elements
     loggedInLinks.style.display = "block";
 
@@ -27,6 +30,8 @@ const setUpUI = (user) => {
       item.style.display = "none";
     });
   } else {
+    //hide account info
+    usernameContainer.innerHTML = "";
     loggedInLinks.style.display = "none";
     loggedOutLinks.forEach((item) => {
       item.style.display = "block";
@@ -49,9 +54,24 @@ signupForm.addEventListener("submit", (e) => {
 
   //auto generates unique user ID
   auth.createUserWithEmailAndPassword(email, password).then((cred) => {
-    usernameContainer.innerHTML = cred.user.email;
-    signupForm.reset();
-    rooms.style.display = "block";
+    //IMPORTANT
+    //IMPORTANT
+    // look into this more- doc somehow ties the current uid with a user collection uid
+    return db
+      .collection("users")
+      .doc(cred.user.uid)
+      .set({
+        name: cred.user.email,
+        list_one: [],
+        list_two: [],
+        list_three: [],
+        list_four: [],
+      })
+      .then(() => {
+        usernameContainer.innerHTML = `Hello ${cred.user.email}`;
+        signupForm.reset();
+        rooms.style.display = "block";
+      });
   });
 });
 
@@ -82,7 +102,6 @@ signinForm.addEventListener("submit", (e) => {
   auth.signInWithEmailAndPassword(email, password).then((cred) => {
     //cred is access to users info
     usernameContainer.innerHTML = "Hello " + cred.user.email;
-    console.log("logged in");
     signinForm.reset();
     rooms.style.display = "block";
   });
@@ -102,12 +121,12 @@ auth.onAuthStateChanged((user) => {
     //async task
     //snapshot digital representation in that moment in tiome
     rooms.style.display = "block";
-    db.collection("rooms")
-      .get()
-      .then((snapshot) => {
-        console.log("Snapshot docs", snapshot.docs);
-        setUpRooms(snapshot.docs);
-      });
+    //instead of onSnapshot before you had .add().then() to just add it, but we want to listen to it
+    //so onSnapshot says im gonna get the data to begin with- retrieve it- sets up a listener to database- anytime theres a change- it fires again and you received updated snapshot
+    db.collection("rooms").onSnapshot((snapshot) => {
+      //console.log("Snapshot docs", snapshot.docs);
+      setUpRooms(snapshot.docs);
+    });
     setUpUI(user);
   } else {
     setUpRooms([]);
@@ -122,7 +141,7 @@ const setUpRooms = (data) => {
     let html = "";
     data.forEach((doc) => {
       const room = doc.data();
-      console.log("Iterated snapshot", room);
+      //console.log("Iterated snapshot", room);
       const li = `<li><button>${room.Name}</button>${room.Count} Students</li>`;
 
       html += li;
@@ -132,3 +151,24 @@ const setUpRooms = (data) => {
     roomList.innerHTML = `<h5>Log in to view rooms</h5>`;
   }
 };
+
+//create new room
+const createForm = document.querySelector("#create-room");
+
+createForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  //create new record in firestore database
+  db.collection("rooms")
+    .add({
+      Name: createForm["room-name"].value,
+      Count: createForm["room-count"].value,
+    })
+    .then(() => {
+      //close modal and reset form
+      createForm.reset();
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+});
