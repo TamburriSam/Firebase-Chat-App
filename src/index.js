@@ -1,4 +1,16 @@
+//const { default: firebase } = require("firebase");
+//import * as firebase from "firebase";
 //make auth and firestore
+var firebaseConfig = {
+  apiKey: "AIzaSyDS0-IJar13_e77IoYAAAIE5YyRGDfmUH0",
+  authDomain: "second-6266e.firebaseapp.com",
+  projectId: "second-6266e",
+  storageBucket: "second-6266e.appspot.com",
+  messagingSenderId: "884343805455",
+  appId: "1:884343805455:web:bf0c472390ea6ef35ff57a",
+};
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
@@ -179,53 +191,27 @@ createForm.addEventListener("submit", (e) => {
 });
 
 //start here- this sets up a listener on the room for when its received updates
-
-//get the name
-let count = 0;
 document.body.addEventListener("click", function (event) {
+  let id;
+  let docRef;
   if (event.target.dataset.id == "btn") {
-    let wantedValue = event.target.innerHTML;
-    console.log(wantedValue);
+    id = event.target.id;
 
-    db.collection("rooms").onSnapshot((snapshot) => {
-      //console.log("Snapshot docs", snapshot.docs);
-      snapshot.forEach((snap) => {
-        if (snap.data().Name === wantedValue) {
-          if (snap.data().active_count < snap.data().Count) {
-            //snap.data().active_count += 1;
-            console.log(true);
-            console.log(snap);
-            console.log(snap.data().Name);
-            console.log(snap.id);
+    docRef = db.collection("rooms").doc(id);
+  }
 
-            return db
-              .collection("rooms")
-              .doc(snap.id)
-              .update({
-                Count: (count += 1),
-              });
-          } else {
-            console.log(false);
-          }
+  return db
+    .runTransaction((transaction) => {
+      return transaction.get(docRef).then((doc) => {
+        console.log(doc.data());
+
+        if (doc.data().active_count < doc.data().Count) {
+          let newCount = doc.data().active_count + 1;
+          transaction.update(docRef, { active_count: newCount });
         }
       });
+    })
+    .then(() => {
+      console.log("yay");
     });
-  }
 });
-
-/* db.collection("rooms").onSnapshot((snapshot) => {
-  console.log(snapshot.docs);
-});
-
-var frankDocRef = db
-  .collection("rooms")
-  .doc("Eng 222")
-  .update({
-    Count: 1,
-  })
-  .then(() => {
-    console.log("updated");
-  });
-
-console.log(frankDocRef);
- */
