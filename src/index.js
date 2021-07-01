@@ -1,5 +1,8 @@
 //const { default: firebase } = require("firebase");
 //import * as firebase from "firebase";
+
+const { default: firebase } = require("firebase");
+
 //make auth and firestore
 var firebaseConfig = {
   apiKey: "AIzaSyDS0-IJar13_e77IoYAAAIE5YyRGDfmUH0",
@@ -180,6 +183,9 @@ createForm.addEventListener("submit", (e) => {
       Name: createForm["room-name"].value,
       Count: createForm["room-count"].value,
       active_count: 0,
+      user_names: [],
+      users: [],
+      words: [],
     })
     .then(() => {
       //close modal and reset form
@@ -192,26 +198,74 @@ createForm.addEventListener("submit", (e) => {
 
 //start here- this sets up a listener on the room for when its received updates
 document.body.addEventListener("click", function (event) {
-  let id;
-  let docRef;
+  let id, docRef, usersRef;
   if (event.target.dataset.id == "btn") {
     id = event.target.id;
 
     docRef = db.collection("rooms").doc(id);
-  }
+    //usersRef = db.collection("rooms");
 
-  return db
-    .runTransaction((transaction) => {
-      return transaction.get(docRef).then((doc) => {
-        console.log(doc.data());
+    return db
+      .runTransaction((transaction) => {
+        return transaction.get(docRef).then((doc) => {
+          console.log(doc.data());
 
-        if (doc.data().active_count < doc.data().Count) {
-          let newCount = doc.data().active_count + 1;
-          transaction.update(docRef, { active_count: newCount });
-        }
+          if (doc.data().active_count < doc.data().Count) {
+            let newCount = doc.data().active_count + 1;
+            transaction.update(docRef, { active_count: newCount });
+          }
+          //else start
+          //cant bc then executes
+        });
+      })
+      .then(() => {
+        //then get the user
+        console.log("user", firebase.auth().currentUser.uid);
+        console.log("userName", firebase.auth().currentUser.email);
+
+        console.log("yay");
+        return docRef
+          .update({
+            users: firebase.firestore.FieldValue.arrayUnion(
+              firebase.auth().currentUser.uid
+            ),
+            user_names: firebase.firestore.FieldValue.arrayUnion(
+              firebase.auth().currentUser.email
+            ),
+          })
+          .then(() => {
+            //here we need to add it here
+            //find the count
+            docRef.get().then((doc) => {
+              console.log("doc", doc.data());
+
+              if (doc.data().Count === doc.data().active_count) {
+                console.log("fetched");
+                const playBox = document.querySelector("#play-box");
+                playBox.style.display = "block";
+
+                usernameContainer.innerHTML = doc.data().Name;
+                getUsers(docRef);
+              }
+            });
+            console.log("user added");
+          });
+
+        //store the user?
       });
-    })
-    .then(() => {
-      console.log("yay");
-    });
+  }
 });
+
+function getUsers(room) {
+  let inputList = document.querySelector("#input-list");
+  let html;
+  console.log("HAR");
+  room.get().then((doc) => {
+    /* doc.data().user_names.forEach((user) => {
+      console.log("usersadfg", user);
+    }); */
+    console.log(`doc ${doc.data().Count}`);
+  });
+}
+
+console.log(8);
