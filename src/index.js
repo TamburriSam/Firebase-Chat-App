@@ -33,6 +33,8 @@ const rooms = document.querySelector("#rooms");
 const loggedOutLinks = document.querySelectorAll(".logged-out");
 const loggedInLinks = document.querySelector(".logged-in");
 
+let inputList = document.querySelector("#input-list");
+
 const setUpUI = (user) => {
   if (user) {
     //output account information
@@ -224,6 +226,11 @@ document.body.addEventListener("click", function (event) {
         console.log("userName", firebase.auth().currentUser.email);
 
         console.log("yay");
+        console.log("fetched");
+        const playBox = document.querySelector("#play-box");
+        playBox.style.display = "block";
+
+        getUsers(docRef);
         return docRef
           .update({
             users: firebase.firestore.FieldValue.arrayUnion(
@@ -236,16 +243,21 @@ document.body.addEventListener("click", function (event) {
           .then(() => {
             //here we need to add it here
             //find the count
+            //  WE WILL EVENTUALLY HAVE TO MOVE THIS UP THERE TO THE OTHER "THEN"
+            //BECAUSE WE WANT TO DISPLAY THE ROOM AS SOON AS ITS JOINED NOT WHEN THE COUNT IS REACHED
             docRef.get().then((doc) => {
+              usernameContainer.innerHTML = doc.data().Name;
+
               console.log("doc", doc.data());
 
               if (doc.data().Count === doc.data().active_count) {
-                console.log("fetched");
+                /* console.log("fetched");
                 const playBox = document.querySelector("#play-box");
                 playBox.style.display = "block";
 
-                usernameContainer.innerHTML = doc.data().Name;
+                usernameContainer.innerHTML = doc.data().Name; */
                 getUsers(docRef);
+                startGame(docRef);
               }
             });
             console.log("user added");
@@ -260,12 +272,48 @@ function getUsers(room) {
   let inputList = document.querySelector("#input-list");
   let html;
   console.log("HAR");
-  room.get().then((doc) => {
-    /* doc.data().user_names.forEach((user) => {
-      console.log("usersadfg", user);
-    }); */
-    console.log(`doc ${doc.data().Count}`);
+  //display the usernames
+  //but we want to set up a listener
+
+  room.onSnapshot((snapshot) => {
+    let html = "";
+    snapshot.data().user_names.forEach((user) => {
+      html += `<li> ${user} </li>`;
+      console.log(user);
+    });
+    inputList.innerHTML = html;
   });
+
+  /* room.get().then((doc) => {
+    let html = "";
+
+    doc.data().user_names.forEach((user) => {
+      html += `<li> ${user} </li>`;
+      console.log(user);
+    });
+    inputList.innerHTML = html;
+  }); */
 }
 
-console.log(8);
+const test = document.querySelector("#test-btn");
+test.addEventListener("click", () => {
+  console.log(firebase.auth().currentUser.email);
+});
+
+function startGame(room) {
+  //get the count
+  //make a loop making inputs the size of count
+
+  room.get().then((doc) => {
+    console.log("DOCDOC:", doc.data().Count);
+    let listofInp = document.querySelector("#input-list");
+    let html = "";
+
+    for (let i = 0; i < doc.data().Count; i++) {
+      html += `<li><input type="text" placeholder="enter word" </input> <li>`;
+    }
+    html += `<button id="next-1">Next</button>`;
+    listofInp.innerHTML = html;
+  });
+  console.log(room);
+}
