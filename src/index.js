@@ -146,8 +146,12 @@ auth.onAuthStateChanged((user) => {
     });
     setUpUI(user);
   } else {
+    //if user signs out
     setUpRooms([]);
     setUpUI();
+    //function that makes user delete on logout
+    //how do we get the ID of the user if we reference it through the
+    //maybe we can save the chat ID to the user profile and get it through the users id in their (user)
   }
 });
 
@@ -278,6 +282,9 @@ function getUsers(room) {
   //but we want to set up a listener
 
   room.onSnapshot((snapshot) => {
+    //IF THERE IS NOW A LISTENER HERE FOR USERS
+    //CAN WE SET UP A LISTETNER FOR THE COUNT AS WELL
+    //ANOTHER PARAMETER FOR THE DOCREF WITH A TWEAK FOR USERS FIELD INSTEAD
     let html = "";
     snapshot.data().user_names.forEach((user) => {
       html += `<li> ${user} </li>`;
