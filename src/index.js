@@ -251,11 +251,13 @@ document.body.addEventListener("click", function (event) {
               console.log("doc", doc.data());
 
               if (doc.data().Count === doc.data().active_count) {
-                /* console.log("fetched");
-                const playBox = document.querySelector("#play-box");
-                playBox.style.display = "block";
-
-                usernameContainer.innerHTML = doc.data().Name; */
+                ///
+                ///
+                ///
+                ///OK SO ISSUE- THE ROOM ONLY STARTSS IF THE TWELFTH PERSON HIT IT
+                ///WE NEED A WAY TO BROADCAST ONCE A CONDITION IS MET
+                ///SET UP SOME TYPE OF LISTENER IN THE GLOBAL SCOPE?
+                ///ALSO FOR TESTING PURRPOSES, LETS REMOVE USERS ON SIGNOUT FUNCTION
                 getUsers(docRef);
                 startGame(docRef);
               }
