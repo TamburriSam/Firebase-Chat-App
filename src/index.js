@@ -152,6 +152,8 @@ auth.onAuthStateChanged((user) => {
     //function that makes user delete on logout
     //how do we get the ID of the user if we reference it through the
     //maybe we can save the chat ID to the user profile and get it through the users id in their (user)
+    ///BETTER YET LETS MAKE THE USER 'DISSAPPEAR' FROM THE ROOM IF THEY LEAVE THE CHAT- WE NEED THAT TO MAKE SURE EVERY ONE IS PRESENT AT LEAST ON THE UI SIDE
+    //A LISTENER ON THE ROOM ITSELF
   }
 });
 
@@ -204,7 +206,7 @@ createForm.addEventListener("submit", (e) => {
 
 //start here- this sets up a listener on the room for when its received updates
 document.body.addEventListener("click", function (event) {
-  let id, docRef, usersRef;
+  let id, docRef;
   if (event.target.dataset.id == "btn") {
     id = event.target.id;
 
@@ -292,16 +294,6 @@ function getUsers(room) {
     });
     inputList.innerHTML = html;
   });
-
-  /* room.get().then((doc) => {
-    let html = "";
-
-    doc.data().user_names.forEach((user) => {
-      html += `<li> ${user} </li>`;
-      console.log(user);
-    });
-    inputList.innerHTML = html;
-  }); */
 }
 
 const test = document.querySelector("#test-btn");
