@@ -326,15 +326,11 @@ function isRoomFull(room){
 
  
    if(data.Count === data.active_count){
-      
     getUsers(targetRoom)
     startGame(targetRoom)
-
     }else{
       console.log('waiting for all users to join')
     }
-
-
   })
 /*   room.onSnapshot((snapshot) => {
     console.log(`SNAPSHOT DATA`, snapshot.data())
@@ -390,9 +386,10 @@ test.addEventListener("click", () => {
 console.log('test')
 }); 
 
-function startGame(room) {
+/* function startGame(room) {
   //get the count
   //make a loop making inputs the size of count
+  //should probably be a transaction
 
   room.get().then((doc) => {
     console.log("DOCDOC:", doc.data().Count);
@@ -400,10 +397,55 @@ function startGame(room) {
     let html = "";
 
     for (let i = 0; i < doc.data().Count; i++) {
-      html += `<li><input type="text" placeholder="enter word" </input> <li>`;
+      html += `<li><input type="text" placeholder="enter word" class="input-cell" </input> <li>`;
     }
     html += `<button id="next-1">Next</button>`;
     listofInp.innerHTML = html;
   });
   console.log(room);
+} */
+
+function startGame(room){
+  return db.runTransaction((transaction) => {
+    return transaction.get(room).then((doc) => {
+      console.log("DOCDOC:", doc.data().Count);
+      let listofInp = document.querySelector("#input-list");
+      let html = "";
+  
+      for (let i = 0; i < doc.data().Count; i++) {
+        html += `<li><input type="text" placeholder="enter word" class="input-cell" </input> <li>`;
+      }
+      html += `<button class="next-1"id='${doc.id}'>Next</button>`;
+      listofInp.innerHTML = html;
+    }).then(() => {
+     /*  let inputCells = document.querySelectorAll('.input-cell')
+
+      inputCells.forEach((cell) => {
+        console.log(cell.value)
+      }) */
+
+      let nextBtn = document.querySelector('.next-1')
+
+      nextBtn.addEventListener('click', cellValue1)
+
+    })
+  })
+}
+
+function cellValue1(e){
+  console.log(`ROOMROOM`, e.target.id)
+   let inputCells = document.querySelectorAll('.input-cell')
+let docRef = db.collection('rooms').doc(e.target.id)
+  
+
+        docRef.get().then((doc) => {
+          console.log(`DOCDATADOCDATA`, doc.data())
+
+          inputCells.forEach((cell) => {
+            console.log(cell.value)
+            doc.ref.update({
+              words: firebase.firestore.FieldValue.arrayUnion(cell.value)
+            })
+        })
+      }) 
 }
