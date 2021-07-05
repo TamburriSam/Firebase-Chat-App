@@ -83,6 +83,7 @@ signupForm.addEventListener("submit", (e) => {
         list_two: [],
         list_three: [],
         list_four: [],
+        rooms_joined: [],
       })
       .then(() => {
         usernameContainer.innerHTML = `Hello ${cred.user.email}`;
@@ -154,6 +155,8 @@ auth.onAuthStateChanged((user) => {
     //maybe we can save the chat ID to the user profile and get it through the users id in their (user)
     ///BETTER YET LETS MAKE THE USER 'DISSAPPEAR' FROM THE ROOM IF THEY LEAVE THE CHAT- WE NEED THAT TO MAKE SURE EVERY ONE IS PRESENT AT LEAST ON THE UI SIDE
     //A LISTENER ON THE ROOM ITSELF
+
+
   }
 });
 
@@ -254,7 +257,15 @@ document.body.addEventListener("click", function (event) {
             docRef.get().then((doc) => {
               usernameContainer.innerHTML = doc.data().Name;
 
-              console.log("doc", doc.data());
+              console.log("docID", doc.id);
+              let currentUserId = firebase.auth().currentUser.uid
+              console.log(`currentUserId`, currentUserId)
+              
+              db.collection('users').doc(currentUserId).update({
+                rooms_joined: doc.id
+              })
+
+              //save the user id of docref under the user profile
 
               if (doc.data().Count === doc.data().active_count) {
                 ///
@@ -277,7 +288,7 @@ document.body.addEventListener("click", function (event) {
 });
 
 function getUsers(room) {
-  let inputList = document.querySelector("#input-list");
+  let inputList = document.querySelector("#user-list");
   let html;
   console.log("HAR");
   //display the usernames
