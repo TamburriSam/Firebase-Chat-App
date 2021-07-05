@@ -12,5 +12,10 @@
 #play-box {
   border: 2px solid black;
   padding: 20px;
-  display: none;
+  display: grid;
+  grid-template-columns: 200px 200px 200px 200px 200px;
+}
+
+.play-1{
+  grid-column: 1;
 }

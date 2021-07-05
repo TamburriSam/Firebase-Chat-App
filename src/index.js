@@ -246,7 +246,7 @@ document.body.addEventListener("click", function (event) {
         console.log("yay");
         console.log("fetched");
         const playBox = document.querySelector("#play-box");
-        playBox.style.display = "block";
+        playBox.style.display = "grid";
 
         getUsers(docRef);
         return docRef
@@ -382,9 +382,7 @@ function userDeleteOnSignOut(){
 }
 
 const test = document.querySelector("#test-btn");
-test.addEventListener("click", () => {
-console.log('test')
-}); 
+test.addEventListener("click", populateCells)
 
 /* function startGame(room) {
   //get the count
@@ -432,7 +430,8 @@ function startGame(room){
   })
 }
 
-function cellValue1(e){
+/* function cellValue1(e){
+  //WORKS
   console.log(`ROOMROOM`, e.target.id)
    let inputCells = document.querySelectorAll('.input-cell')
 let docRef = db.collection('rooms').doc(e.target.id)
@@ -447,5 +446,61 @@ let docRef = db.collection('rooms').doc(e.target.id)
               words: firebase.firestore.FieldValue.arrayUnion(cell.value)
             })
         })
-      }) 
+      }).then((doc) => {
+        console.log(`INDOC`, doc.data())
+      })
+} */
+
+function cellValue1(e){
+  //WORKS
+  let docRef = db.collection('rooms').doc(e.target.id)
+
+  return db.runTransaction((transaction) => {
+    return transaction.get(docRef).then((doc) => {
+      let inputCells = document.querySelectorAll('.input-cell')
+      inputCells.forEach((cell) => {
+        console.log(cell.value)
+        doc.ref.update({
+          words: firebase.firestore.FieldValue.arrayUnion(cell.value)
+        })
+      })
+    }).then(() => {
+      console.log('works')
+
+      docRef.get().then((doc) => {
+       
+     
+        /* console.log(`WORKSWORKS`, doc.data().words(randomNumber)) */
+          let listone = document.getElementById('input-list')
+       
+        ;
+        let html = '';
+        for(let i = 0; i < doc.data().Count; i++){
+          let randomNumber = Math.floor(Math.random() * doc.data().Count);
+          html += `<li>${doc.data().words[randomNumber]}</li>`
+        }
+        listone.innerHTML = html
+  
+
+
+
+
+      })
+
+
+    })
+  })
+}
+
+
+
+
+
+function populateCells(e){
+  let inputCells = document.querySelectorAll('.input-cell')
+  let docRef = db.collection('rooms').doc(e.target.id)
+
+docRef.get().then((doc) => {
+  console.log(doc.data())
+})
 }
