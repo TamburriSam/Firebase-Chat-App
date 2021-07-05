@@ -148,8 +148,17 @@ auth.onAuthStateChanged((user) => {
     setUpUI(user);
   } else {
     //if user signs out
+    userDeleteOnSignOut(user, firebase.auth().currentUser.uid);
     setUpRooms([]);
     setUpUI();
+
+
+    //first read the id from the rooms_joined then plug the id into the db collection rooms 
+
+  /*   db.collection('users').doc(firebase.auth().currentUser.uid).get().then((doc) => {
+      console.log(`DOC DATA DOC DATA`, doc.data())
+    }) */
+    //
     //function that makes user delete on logout
     //how do we get the ID of the user if we reference it through the
     //maybe we can save the chat ID to the user profile and get it through the users id in their (user)
@@ -307,10 +316,77 @@ function getUsers(room) {
   });
 }
 
+console.log(firebase.auth().currentUser)
+
+function userDeleteOnSignOut(data, userId){
+  if(data){
+  db.collection('users').doc(userId).get().then((doc) => {
+    console.log(`DOC DATA DOC DATA`, doc.data().rooms_joined)
+
+    //find the username in the room collection with the rooms_joined(aka the only room the user went into thats saved in his user profile)
+    
+    db.collection('rooms').doc(doc.data().rooms_joined).get().then((doc) => {
+      doc.data().users.forEach((user) => {
+        if(user === firebase.auth().currentUser.uid){
+          //delete user from room and delete user from users array
+          console.log(`UHM USER LIKE:`,user)
+
+          console.log(`DOCREF`,doc.ref)
+
+          //delete the id
+           doc.ref.update({
+            users: firebase.firestore.FieldValue.arrayRemove(user)
+          }) 
+
+          //delete the username
+          //WE ACTUALLLY dont need to delete the username
+          //the username can go when the room goes
+          //WHEN THE USER ARRAY IN THE ROOMS HIT ZERO 
+          //DELETE THE ROOM
+
+        }
+      })
+    })
+
+  })
+}else {
+  console.log('signed in')
+}
+}
+
 const test = document.querySelector("#test-btn");
 test.addEventListener("click", () => {
-  console.log(firebase.auth().currentUser.email);
-});
+  let docData;
+  db.collection('users').doc(firebase.auth().currentUser.uid).get().then((doc) => {
+    console.log(`DOC DATA DOC DATA`, doc.data().rooms_joined)
+
+    //find the username in the room collection with the rooms_joined(aka the only room the user went into thats saved in his user profile)
+    
+    db.collection('rooms').doc(doc.data().rooms_joined).get().then((doc) => {
+      doc.data().users.forEach((user) => {
+        if(user === firebase.auth().currentUser.uid){
+          //delete user from room and delete user from users array
+          console.log(`UHM USER LIKE:`,user)
+
+          console.log(`DOCREF`,doc.ref)
+
+          //delete the id
+           doc.ref.update({
+            users: firebase.firestore.FieldValue.arrayRemove(user)
+          }) 
+
+          //delete the username
+          //WE ACTUALLLY dont need to delete the username
+          //the username can go when the room goes
+          //WHEN THE USER ARRAY IN THE ROOMS HIT ZERO 
+          //DELETE THE ROOM
+
+        }
+      })
+    })
+
+  })
+}); 
 
 function startGame(room) {
   //get the count
