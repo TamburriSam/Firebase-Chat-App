@@ -96,11 +96,42 @@ signupForm.addEventListener("submit", (e) => {
 //logout
 logOutBtn.addEventListener("click", function (e) {
   e.preventDefault();
+  userDeleteOnSignOut();
+/*   db.collection('users').doc(firebase.auth().currentUser.uid).get().then((doc) => {
+    console.log(`DOC DATA DOC DATA`, doc.data().rooms_joined)
 
+    //find the username in the room collection with the rooms_joined(aka the only room the user went into thats saved in his user profile)
+    
+    db.collection('rooms').doc(doc.data().rooms_joined).get().then((doc) => {
+      doc.data().users.forEach((user) => {
+        if(user === firebase.auth().currentUser.uid){
+          //delete user from room and delete user from users array
+          console.log(`UHM USER LIKE:`,user)
+
+          console.log(`DOCREF`,doc.ref)
+
+          //delete the id
+           doc.ref.update({
+            users: firebase.firestore.FieldValue.arrayRemove(user)
+          }) 
+
+          //delete the username
+          //WE ACTUALLLY dont need to delete the username
+          //the username can go when the room goes
+          //WHEN THE USER ARRAY IN THE ROOMS HIT ZERO 
+          //DELETE THE ROOM
+
+        }
+      })
+    }) */
+  
+
+ /*  }) */
   //dont need response for server so no arg?
-  auth.signOut().then(() => {
+/*   auth.signOut().then(() => {
     console.log("user signed out");
-  });
+    
+  }); */
   usernameContainer.innerHTML = "Signed Out";
   rooms.style.display = "none";
 });
@@ -137,6 +168,7 @@ auth.onAuthStateChanged((user) => {
   if (user) {
     //get data
     //async task
+    console.log(`USERUSER`, user)
     //snapshot digital representation in that moment in tiome
     rooms.style.display = "block";
     //instead of onSnapshot before you had .add().then() to just add it, but we want to listen to it
@@ -146,9 +178,12 @@ auth.onAuthStateChanged((user) => {
       setUpRooms(snapshot.docs);
     });
     setUpUI(user);
+    //userDeleteOnSignOut(user, firebase.auth().currentUser.uid);
+
   } else {
     //if user signs out
-    userDeleteOnSignOut(user, firebase.auth().currentUser.uid);
+    //not working bc the user is signed out initially on page load
+   //userDeleteOnSignOut();
     setUpRooms([]);
     setUpUI();
 
@@ -318,9 +353,12 @@ function getUsers(room) {
 
 console.log(firebase.auth().currentUser)
 
-function userDeleteOnSignOut(data, userId){
-  if(data){
-  db.collection('users').doc(userId).get().then((doc) => {
+console.log(8)
+
+function userDeleteOnSignOut(){
+
+
+  db.collection('users').doc(firebase.auth().currentUser.uid).get().then((doc) => {
     console.log(`DOC DATA DOC DATA`, doc.data().rooms_joined)
 
     //find the username in the room collection with the rooms_joined(aka the only room the user went into thats saved in his user profile)
@@ -336,7 +374,7 @@ function userDeleteOnSignOut(data, userId){
           //delete the id
            doc.ref.update({
             users: firebase.firestore.FieldValue.arrayRemove(user)
-          }) 
+          })
 
           //delete the username
           //WE ACTUALLLY dont need to delete the username
@@ -346,12 +384,16 @@ function userDeleteOnSignOut(data, userId){
 
         }
       })
+    }).then(() => {
+      console.log('signed out sonasokdfn')
+      auth.signOut().then(() => {
+        console.log('booyah')
+      })
     })
 
   })
-}else {
-  console.log('signed in')
-}
+
+
 }
 
 const test = document.querySelector("#test-btn");
