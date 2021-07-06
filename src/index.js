@@ -452,6 +452,8 @@ let docRef = db.collection('rooms').doc(e.target.id)
 } */
 
 function cellValue1(e){
+  //WHAT IF INSTEAD OF THIS
+  //WE UPLOADED A USERS LIST TO AN ARRAY
   //WORKS
   let docRef = db.collection('rooms').doc(e.target.id)
 
@@ -468,8 +470,6 @@ function cellValue1(e){
       console.log('works')
 
       docRef.get().then((doc) => {
-       
-     
         /* console.log(`WORKSWORKS`, doc.data().words(randomNumber)) */
           let listone = document.getElementById('input-list')
        
@@ -480,10 +480,6 @@ function cellValue1(e){
           html += `<li>${doc.data().words[randomNumber]}</li>`
         }
         listone.innerHTML = html
-  
-
-
-
 
       })
 
@@ -493,7 +489,7 @@ function cellValue1(e){
 }
 
 
-
+//INSTEAD OF USERNAMES BEING SAVED IN THE ROOM AND CAUSING BLOAT WE COULD JUST HAVE A USER MAKE A SCREEN NAME ON SIGN IN AND USE THAT OR SAVE THAT IN THE DB UNDER USER OR SOMETHING
 
 
 function populateCells(e){
