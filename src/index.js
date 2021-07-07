@@ -388,24 +388,6 @@ function userDeleteOnSignOut(){
 const test = document.querySelector("#test-btn");
 test.addEventListener("click", populateCells)
 
-/* function startGame(room) {
-  //get the count
-  //make a loop making inputs the size of count
-  //should probably be a transaction
-
-  room.get().then((doc) => {
-    console.log("DOCDOC:", doc.data().Count);
-    let listofInp = document.querySelector("#input-list");
-    let html = "";
-
-    for (let i = 0; i < doc.data().Count; i++) {
-      html += `<li><input type="text" placeholder="enter word" class="input-cell" </input> <li>`;
-    }
-    html += `<button id="next-1">Next</button>`;
-    listofInp.innerHTML = html;
-  });
-  console.log(room);
-} */
 
 function startGame(room){
   return db.runTransaction((transaction) => {
@@ -420,12 +402,7 @@ function startGame(room){
       html += `<button class="next-1"id='${doc.id}'>Next</button>`;
       listofInp.innerHTML = html;
     }).then(() => {
-     /*  let inputCells = document.querySelectorAll('.input-cell')
-
-      inputCells.forEach((cell) => {
-        console.log(cell.value)
-      }) */
-
+   
       let nextBtn = document.querySelector('.next-1')
 
       nextBtn.addEventListener('click', cellValue1)
@@ -434,30 +411,9 @@ function startGame(room){
   })
 }
 
-/* function cellValue1(e){
-  //WORKS
-  console.log(`ROOMROOM`, e.target.id)
-   let inputCells = document.querySelectorAll('.input-cell')
-let docRef = db.collection('rooms').doc(e.target.id)
-  
-
-        docRef.get().then((doc) => {
-          console.log(`DOCDATADOCDATA`, doc.data())
-
-          inputCells.forEach((cell) => {
-            console.log(cell.value)
-            doc.ref.update({
-              words: firebase.firestore.FieldValue.arrayUnion(cell.value)
-            })
-        })
-      }).then((doc) => {
-        console.log(`INDOC`, doc.data())
-      })
-} */
 
 function cellValue1(e){
-  //WHAT IF INSTEAD OF THIS
-  //WE UPLOADED A USERS LIST TO AN ARRAY
+ 
   //WORKS
   let docRef = db.collection('rooms').doc(e.target.id)
 
@@ -488,7 +444,34 @@ function cellValue1(e){
       })
 
 
-    })
+    }).then(() => {
+      //CHAINING THIS ON HERE BUT WE NEED TO STUFF THIS IN A FUNCTION 
+      docRef.get().then((doc) => {
+        console.log(`BLUE TEST`,doc.data().words)
+
+        let inputList1 = document.getElementById('input-list1')
+        let html = '';
+
+        for(let i = 0; i < doc.data().active_count; i++){
+          html += `<li>
+          <input type="text" placeholder="enter word" class="input-cell2"</input>
+          </li>`
+
+        
+        }
+        html += `<button class="next-2"id='${doc.id}'>Next</button>`
+        inputList1.innerHTML = html
+      })
+    }).then((doc) => {
+      let nextBtn2 = document.getElementById(doc.id)
+
+      console.log(nextBtn2.innerHTML)
+
+      nextBtn2.addEventListener('click', function(){
+        console.log('hey')
+      })
+      //nextBtn2.addEventListener('click')
+     })
   })
 }
 
@@ -506,4 +489,40 @@ function populateCells(e){
 docRef.get().then((doc) => {
   console.log(doc.data())
 })
+}
+
+function populateTwo(e){
+  
+
+  let docRef = db.collection('rooms').doc(e.target.id)
+  return db.runTransaction((transaction) => {
+    return transaction.get(docRef).then((doc) => {
+  console.log('works')
+  let inputCells2 = document.querySelectorAll('input-cell2')
+      console.log('works')
+    
+      inputCells2.forEach((cell) => {
+        console.log(cell.value)
+        doc.ref.update({
+          words: firebase.firestore.FieldValue.arrayUnion(cell.value)
+        })
+      }) 
+    }).then(() => {
+      console.log('works')
+
+      docRef.get().then((doc) => {
+        /* console.log(`WORKSWORKS`, doc.data().words(randomNumber)) */
+          let listtwo = document.getElementById('input-list2')
+       
+        ;
+        let html = '';
+        for(let i = 0; i < doc.data().Count; i++){
+          let randomNumber = Math.floor(Math.random() * doc.data().Count);
+          html += `<li>${doc.data().words[randomNumber]}</li>`
+        }
+        listtwo.innerHTML = html
+  
+      })
+    })
+  })
 }
