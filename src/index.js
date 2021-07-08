@@ -386,7 +386,21 @@ function userDeleteOnSignOut(){
 }
 
 const test = document.querySelector("#test-btn");
-test.addEventListener("click", populateCells)
+test.addEventListener("click", function(){
+  let userRef = db.collection('users').doc(firebase.auth().currentUser.uid)
+
+  userRef.update({
+    list_one: 'j'
+  })
+})
+
+function updateListOne(){
+  let userRef = db.collection('users').doc(firebase.auth().currentUser.uid)
+
+  userRef.get().then((doc) => {
+    console.log(doc.data())
+  })
+}
 
 
 function startGame(room){
@@ -397,7 +411,7 @@ function startGame(room){
       let html = "";
   
       for (let i = 0; i < doc.data().Count; i++) {
-        html += `<li><input type="text" placeholder="enter word" class="input-cell" </input> <li>`;
+        html += `<li><input type="text" placeholder="enter word" class="input-cell" </input> </li>`;
       }
       html += `<button class="next-1"id='${doc.id}'>Next</button>`;
       listofInp.innerHTML = html;
@@ -416,7 +430,7 @@ function cellValue1(e){
  
   //WORKS
   let docRef = db.collection('rooms').doc(e.target.id)
-
+  let userRef = db.collection('users').doc(firebase.auth().currentUser.uid)
   return db.runTransaction((transaction) => {
     return transaction.get(docRef).then((doc) => {
       let inputCells = document.querySelectorAll('.input-cell')
@@ -426,6 +440,10 @@ function cellValue1(e){
           words: firebase.firestore.FieldValue.arrayUnion(cell.value)
         })
       })
+
+     /*  return userRef.update({
+        list_one: firebase.firestore.FieldValue.arrayUnion(cell.value)
+      }) */
     }).then(() => {
       console.log('works')
 
@@ -459,18 +477,16 @@ function cellValue1(e){
 
         
         }
-        html += `<button class="next-2"id='${doc.id}'>Next</button>`
+        html += `<button data-id="next-2" class="next-2"id='${doc.id}'>Next</button>`
         inputList1.innerHTML = html
       })
-    }).then((doc) => {
-      let nextBtn2 = document.getElementById(doc.id)
-
-      console.log(nextBtn2.innerHTML)
-
-      nextBtn2.addEventListener('click', function(){
-        console.log('hey')
-      })
-      //nextBtn2.addEventListener('click')
+     }).then(() => {
+       document.body.addEventListener('click', function(event){
+         if (event.target.dataset.id === 'next-2'){
+           console.log('ok')
+           populateTwo(e)
+         }
+       })
      })
   })
 }
@@ -483,17 +499,17 @@ function cellValue1(e){
 
 
 function populateCells(e){
-  let inputCells = document.querySelectorAll('.input-cell')
-  let docRef = db.collection('rooms').doc(e.target.id)
+ console.log(e.target.id)
 
-docRef.get().then((doc) => {
-  console.log(doc.data())
-})
+ let nextBtn2 = document.querySelector('.next-2')
+ nextBtn2.addEventListener('click', function(){
+   console.log('hi')
+ })
 }
 
 function populateTwo(e){
   
-
+  let userRef = db.collection('users').doc(firebase.auth().currentUser.uid)
   let docRef = db.collection('rooms').doc(e.target.id)
   return db.runTransaction((transaction) => {
     return transaction.get(docRef).then((doc) => {
@@ -512,7 +528,7 @@ function populateTwo(e){
 
       docRef.get().then((doc) => {
         /* console.log(`WORKSWORKS`, doc.data().words(randomNumber)) */
-          let listtwo = document.getElementById('input-list2')
+          let listtwo = document.getElementById('input-list1')
        
         ;
         let html = '';
@@ -523,6 +539,79 @@ function populateTwo(e){
         listtwo.innerHTML = html
   
       })
+  }).then(() => {
+    let inputcells3 = document.getElementById('input-list2')
+    let html = '';
+   docRef.get().then((doc) =>{
+    for(let i = 0; i < doc.data().active_count; i++){
+      html += `<li><input type="text" placeholder="enter word" class="input-cell3" </input> </li>`
+    }
+    html += `<button data-id="next-3" id="${doc.id}"class="next-3">Next</button>`
+    inputcells3.innerHTML = html
+   })
+
+  }).then(() => {
+    document.body.addEventListener('click', function(e){
+      if(e.target.dataset.id === 'next-3'){
+        console.log('woohoo')
+        populateThree(e)
+      }
     })
   })
+  })
+}
+
+const populateThree = (e) => {
+  let docRef = db.collection('rooms').doc(e.target.id)
+
+  return db.runTransaction((transaction) => {
+    return transaction.get(docRef).then((doc) => {
+  console.log('works')
+  let inputCells3 = document.querySelectorAll('input-cell3')
+      console.log('works')
+    
+      inputCells3.forEach((cell) => {
+        console.log(cell.value)
+        doc.ref.update({
+          words: firebase.firestore.FieldValue.arrayUnion(cell.value)
+        })
+      }) 
+    }).then(() => {
+      console.log('works')
+
+      docRef.get().then((doc) => {
+        /* console.log(`WORKSWORKS`, doc.data().words(randomNumber)) */
+          let listthree = document.getElementById('input-list2')
+       
+        ;
+        let html = '';
+        for(let i = 0; i < doc.data().Count; i++){
+          let randomNumber = Math.floor(Math.random() * doc.data().Count);
+          html += `<li>${doc.data().words[randomNumber]}</li>`
+        }
+        listthree.innerHTML = html
+  
+      })
+  }).then(() => {
+    let inputCells4 = document.getElementById('input-list3')
+    let html = '';
+   docRef.get().then((doc) =>{
+    for(let i = 0; i < doc.data().active_count; i++){
+      html += `<li><input type="text" placeholder="enter word" class="input-cell" </input> </li>`
+    }
+    html += `<button data-id="${doc.id}" class="next-3">Next</button>`
+    inputCells4.innerHTML = html
+   })
+
+  })
+  })
+}
+
+const populateFour = (e) => {
+  //FIRST NEED TO SET THE WORDS TO THE USER 
+
+  //HERE WE ONLY NEED TO DELIVER THE WORDS INTO THE DATABASE THEN REROUTE TO A PAGE WHERE THEY SEE THEIR OWN PAGES
+
+  //IF THE WORD IS FOUND IN THE USERS WORD ARRAY
+  //GET ANOTHER WORD
 }
