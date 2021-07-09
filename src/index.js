@@ -1,7 +1,8 @@
-//const { default: firebase } = require("firebase");
-//import * as firebase from "firebase";
 
 const { default: firebase } = require("firebase");
+//import * as firebase from "firebase";
+
+//const { default: firebase } = require("firebase");
 
 //make auth and firestore
 var firebaseConfig = {
@@ -151,21 +152,6 @@ auth.onAuthStateChanged((user) => {
    //userDeleteOnSignOut();
     setUpRooms([]);
     setUpUI();
-
-
-    //first read the id from the rooms_joined then plug the id into the db collection rooms 
-
-  /*   db.collection('users').doc(firebase.auth().currentUser.uid).get().then((doc) => {
-      console.log(`DOC DATA DOC DATA`, doc.data())
-    }) */
-    //
-    //function that makes user delete on logout
-    //how do we get the ID of the user if we reference it through the
-    //maybe we can save the chat ID to the user profile and get it through the users id in their (user)
-    ///BETTER YET LETS MAKE THE USER 'DISSAPPEAR' FROM THE ROOM IF THEY LEAVE THE CHAT- WE NEED THAT TO MAKE SURE EVERY ONE IS PRESENT AT LEAST ON THE UI SIDE
-    //A LISTENER ON THE ROOM ITSELF
-
-
   }
 });
 
@@ -240,11 +226,6 @@ document.body.addEventListener("click", function (event) {
       })
       .then(() => {
         //then get the user
-        console.log("user", firebase.auth().currentUser.uid);
-        console.log("userName", firebase.auth().currentUser.email);
-
-        console.log("yay");
-        console.log("fetched");
         const playBox = document.querySelector("#play-box");
         playBox.style.display = "grid";
 
@@ -265,9 +246,8 @@ document.body.addEventListener("click", function (event) {
             docRef.get().then((doc) => {
               usernameContainer.innerHTML = doc.data().Name;
 
-              console.log("docID", doc.id);
               let currentUserId = firebase.auth().currentUser.uid
-              console.log(`currentUserId`, currentUserId)
+         
               
               db.collection('users').doc(currentUserId).update({
                 rooms_joined: doc.id
@@ -339,13 +319,10 @@ function isRoomFull(room){
 /*   room.onSnapshot((snapshot) => {
     console.log(`SNAPSHOT DATA`, snapshot.data())
     let data = snapshot.data();
-
     if(data.Count === data.active_count){
       getUsers(docRef)
       startGame(docRef)
     }
-
-
   }); */
   console.log(`ROOMROOM`, room)
 }
@@ -385,22 +362,16 @@ function userDeleteOnSignOut(){
   })
 }
 
+let localArray = [];
+
+
 const test = document.querySelector("#test-btn");
 test.addEventListener("click", function(){
-  let userRef = db.collection('users').doc(firebase.auth().currentUser.uid)
-
-  userRef.update({
-    list_one: 'j'
-  })
+ console.log(localArray)
+ console.log(arrayTwo)
 })
 
-function updateListOne(){
-  let userRef = db.collection('users').doc(firebase.auth().currentUser.uid)
 
-  userRef.get().then((doc) => {
-    console.log(doc.data())
-  })
-}
 
 
 function startGame(room){
@@ -430,11 +401,11 @@ function cellValue1(e){
  
   //WORKS
   let docRef = db.collection('rooms').doc(e.target.id)
-  let userRef = db.collection('users').doc(firebase.auth().currentUser.uid)
   return db.runTransaction((transaction) => {
     return transaction.get(docRef).then((doc) => {
       let inputCells = document.querySelectorAll('.input-cell')
       inputCells.forEach((cell) => {
+        localArray.push(cell.value + ' ')
         console.log(cell.value)
         doc.ref.update({
           words: firebase.firestore.FieldValue.arrayUnion(cell.value)
@@ -481,15 +452,28 @@ function cellValue1(e){
         inputList1.innerHTML = html
       })
      }).then(() => {
-       document.body.addEventListener('click', function(event){
+      /*  document.body.addEventListener('click', function(event){
          if (event.target.dataset.id === 'next-2'){
            console.log('ok')
-           populateTwo(e)
+           return populateTwo(e)
          }
-       })
-     })
+       }) */
+       console.log('DOCREF', docRef)
+     }) 
   })
 }
+
+document.body.addEventListener('click', function(e){
+  let inputCells2 = document.querySelectorAll('input-cell2')
+  inputCells2.forEach((cell) => {
+      
+    arrayTwo.push(cell.value)
+  }) 
+  if (e.target.dataset.id === 'next-2'){
+    console.log('ok')
+  populateTwo(e)
+  }
+})
 
 
 //INSTEAD OF USERNAMES BEING SAVED IN THE ROOM AND CAUSING BLOAT WE COULD JUST HAVE A USER MAKE A SCREEN NAME ON SIGN IN AND USE THAT OR SAVE THAT IN THE DB UNDER USER OR SOMETHING
@@ -507,6 +491,8 @@ function populateCells(e){
  })
 }
 
+let arrayTwo = [];
+
 function populateTwo(e){
   
   let userRef = db.collection('users').doc(firebase.auth().currentUser.uid)
@@ -516,12 +502,16 @@ function populateTwo(e){
   console.log('works')
   let inputCells2 = document.querySelectorAll('input-cell2')
       console.log('works')
+
     
       inputCells2.forEach((cell) => {
-        console.log(cell.value)
+      
+        console.log(cell.value, 'CELL VALUE')
         doc.ref.update({
           words: firebase.firestore.FieldValue.arrayUnion(cell.value)
         })
+
+
       }) 
     }).then(() => {
       console.log('works')
@@ -568,10 +558,10 @@ const populateThree = (e) => {
     return transaction.get(docRef).then((doc) => {
   console.log('works')
   let inputCells3 = document.querySelectorAll('input-cell3')
-      console.log('works')
     
       inputCells3.forEach((cell) => {
         console.log(cell.value)
+        localArray.push(cell.value)
         doc.ref.update({
           words: firebase.firestore.FieldValue.arrayUnion(cell.value)
         })
